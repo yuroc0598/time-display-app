@@ -75,8 +75,19 @@ jobs:
         kubectl get pods -n staging
         
         echo "Checking if any pods are in error states..."
-        if kubectl get pods -n staging -o jsonpath='{.items[*].status.containerStatuses[*].state}' | grep -E '(waiting|terminated)'; then
-          echo "Some pods are not running properly. Checking logs..."
+        # Check for pods with error states (exclude successful terminations)
+        ERROR_PODS=$(kubectl get pods -n staging --field-selector=status.phase!=Succeeded,status.phase!=Running -o jsonpath='{.items[*].metadata.name}')
+        if [ ! -z "$ERROR_PODS" ]; then
+          echo "Found pods in error states: $ERROR_PODS"
+          kubectl describe pods $ERROR_PODS -n staging
+          exit 1
+        fi
+        
+        # Check for waiting containers (ImagePullBackOff, CrashLoopBackOff, etc.)
+        WAITING_CONTAINERS=$(kubectl get pods -n staging -o jsonpath='{range .items[*]}{.metadata.name}{": "}{range .status.containerStatuses[*]}{.state}{"\n"}{end}{end}' | grep -E 'waiting.*BackOff|waiting.*Error' || true)
+        if [ ! -z "$WAITING_CONTAINERS" ]; then
+          echo "Found containers in waiting/error states:"
+          echo "$WAITING_CONTAINERS"
           kubectl describe pods -n staging
           exit 1
         fi
