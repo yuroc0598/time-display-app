@@ -6,6 +6,9 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: "archie-dev-ip"
     networking.gke.io/managed-certificates: "archie-dev-ssl-cert"
 spec:
+  tls:
+  - hosts:
+    - dev.34.120.50.114.nip.io
   rules:
   - host: dev.34.120.50.114.nip.io
     http:
