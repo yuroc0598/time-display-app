@@ -1,3 +1,19 @@
+[project]
+name = "time-display-app"
+version = "0.1.0"
+description = "Simple web app displaying current time with FastAPI backend"
+dependencies = [
+    "fastapi==0.104.1",
+    "uvicorn==0.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.1.8",
+    "pytest==7.4.3",
+    "httpx==0.25.2",
+]
+
 [tool.ruff]
 line-length = 88
 target-version = "py312"
@@ -21,7 +37,7 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.pytest.ini_options]
-testpaths = ["."]
+testpaths = ["backend"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
