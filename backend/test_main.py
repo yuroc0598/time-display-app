@@ -1,5 +1,5 @@
-import pytest
 from fastapi.testclient import TestClient
+
 from main import app
 
 client = TestClient(app)
@@ -9,6 +9,7 @@ def test_root_endpoint():
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
 
+
 def test_time_api_endpoint():
     response = client.get("/api/time")
     assert response.status_code == 200
@@ -16,6 +17,7 @@ def test_time_api_endpoint():
     assert "current_time" in data
     assert isinstance(data["current_time"], str)
     assert len(data["current_time"]) > 0
+
 
 def test_time_format():
     response = client.get("/api/time")
