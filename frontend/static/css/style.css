@@ -50,3 +50,67 @@ h1 {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
+
+.world-clock {
+    margin-top: 40px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.world-clock h2 {
+    font-size: 2em;
+    margin-bottom: 30px;
+    font-weight: 300;
+    color: #fff;
+}
+
+.timezone-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.timezone-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.timezone-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.timezone-card h3 {
+    font-size: 1.4em;
+    margin: 0 0 15px 0;
+    color: #fff;
+    font-weight: 400;
+}
+
+.timezone-card .time {
+    font-size: 2.2em;
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    margin: 10px 0;
+    letter-spacing: 1px;
+}
+
+.timezone-card .date {
+    font-size: 1.1em;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 8px 0;
+}
+
+.timezone-card .offset {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 5px 0;
+    font-style: italic;
+}
