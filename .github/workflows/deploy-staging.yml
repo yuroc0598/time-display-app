@@ -32,16 +32,25 @@ jobs:
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
+      with:
+        install_components: 'gke-gcloud-auth-plugin'
 
     - name: Configure Docker for GAR
       run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev
 
+    - name: Install kustomize
+      run: |
+        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        sudo mv kustomize /usr/local/bin/
+
     - name: Get cluster credentials
       run: |
         gcloud container clusters get-credentials archie-staging --zone=$REGION
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
     - name: Deploy to GKE
       run: |
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
         cd k8s/staging
         kustomize edit set image archie-app=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:${{ github.sha }}
         kubectl apply -k .

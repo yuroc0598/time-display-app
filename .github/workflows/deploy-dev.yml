@@ -43,6 +43,8 @@ jobs:
 
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
+      with:
+        install_components: 'gke-gcloud-auth-plugin'
 
     - name: Configure Docker for GAR
       run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev
@@ -55,6 +57,7 @@ jobs:
     - name: Get cluster credentials
       run: |
         gcloud container clusters get-credentials archie-dev --zone=$REGION
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
     - name: Build and push Docker image
       run: |
@@ -64,6 +67,7 @@ jobs:
 
     - name: Deploy to GKE
       run: |
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
         cd k8s/dev
         kustomize edit set image archie-app=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:${{ github.sha }}
         kubectl apply -k .

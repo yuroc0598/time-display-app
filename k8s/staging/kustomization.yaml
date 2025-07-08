@@ -6,6 +6,6 @@ namespace: staging
 resources:
 - ../base
 
-patchesStrategicMerge:
+patches:
 - deployment-patch.yaml
 - ingress-patch.yaml
