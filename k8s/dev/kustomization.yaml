@@ -6,6 +6,6 @@ namespace: dev
 resources:
 - ../base
 
-patches:
+patchesStrategicMerge:
 - deployment-patch.yaml
 - ingress-patch.yaml
