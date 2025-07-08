@@ -26,9 +26,9 @@ async def get_current_time():
         "Tokyo": "Asia/Tokyo",
         "Sydney": "Australia/Sydney",
         "Los Angeles": "America/Los_Angeles",
-        "Dubai": "Asia/Dubai"
+        "Dubai": "Asia/Dubai",
     }
-    
+
     world_times = {}
     for city, tz in timezones.items():
         try:
@@ -37,19 +37,19 @@ async def get_current_time():
                 "time": local_time.strftime("%H:%M:%S"),
                 "date": local_time.strftime("%Y-%m-%d"),
                 "timezone": tz,
-                "offset": local_time.strftime("%z")
+                "offset": local_time.strftime("%z"),
             }
         except Exception:
             world_times[city] = {
                 "time": "--:--:--",
                 "date": "-------",
                 "timezone": tz,
-                "offset": "N/A"
+                "offset": "N/A",
             }
-    
+
     return {
         "current_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "world_times": world_times
+        "world_times": world_times,
     }
 
 
