@@ -48,6 +48,11 @@ jobs:
         gcloud container clusters get-credentials archie-staging --zone=$REGION
         export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
+    - name: Create namespaces
+      run: |
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+        kubectl apply -f k8s/setup-namespaces.yaml
+
     - name: Deploy to GKE
       run: |
         export USE_GKE_GCLOUD_AUTH_PLUGIN=True

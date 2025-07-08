@@ -65,6 +65,11 @@ jobs:
         docker build -t $IMAGE_TAG .
         docker push $IMAGE_TAG
 
+    - name: Create namespaces
+      run: |
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+        kubectl apply -f k8s/setup-namespaces.yaml
+
     - name: Deploy to GKE
       run: |
         export USE_GKE_GCLOUD_AUTH_PLUGIN=True
