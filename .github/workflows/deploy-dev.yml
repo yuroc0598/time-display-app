@@ -31,7 +31,7 @@ jobs:
 
     - name: Install dependencies and run tests
       run: |
-        uv sync
+        uv sync --extra dev
         uv run ruff check backend/
         uv run ruff format backend/ --check
         cd backend && uv run pytest -v
@@ -46,6 +46,11 @@ jobs:
 
     - name: Configure Docker for GAR
       run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev
+
+    - name: Install kustomize
+      run: |
+        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+        sudo mv kustomize /usr/local/bin/
 
     - name: Get cluster credentials
       run: |
