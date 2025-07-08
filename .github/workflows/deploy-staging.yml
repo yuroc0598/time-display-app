@@ -64,5 +64,28 @@ jobs:
 
     - name: Verify deployment
       run: |
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+        echo "Waiting for deployment rollout to complete..."
         kubectl rollout status deployment/archie-deployment -n staging --timeout=300s
+        
+        echo "Waiting for pods to be ready..."
+        kubectl wait --for=condition=ready pod -l app=archie -n staging --timeout=300s
+        
+        echo "Checking pod status..."
+        kubectl get pods -n staging
+        
+        echo "Checking if any pods are in error states..."
+        if kubectl get pods -n staging -o jsonpath='{.items[*].status.containerStatuses[*].state}' | grep -E '(waiting|terminated)'; then
+          echo "Some pods are not running properly. Checking logs..."
+          kubectl describe pods -n staging
+          exit 1
+        fi
+        
+        echo "Testing API endpoint..."
+        kubectl port-forward -n staging svc/archie-service 8080:80 &
+        sleep 5
+        curl -f http://localhost:8080/api/time || exit 1
+        pkill -f "kubectl port-forward"
+        
+        echo "Deployment verification successful!"
         kubectl get services -n staging

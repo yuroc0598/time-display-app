@@ -64,12 +64,37 @@ jobs:
 
     - name: Verify deployment
       run: |
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+        echo "Waiting for deployment rollout to complete..."
         kubectl rollout status deployment/archie-deployment -n production --timeout=300s
+        
+        echo "Waiting for pods to be ready..."
+        kubectl wait --for=condition=ready pod -l app=archie -n production --timeout=300s
+        
+        echo "Checking pod status..."
+        kubectl get pods -n production
+        
+        echo "Checking if any pods are in error states..."
+        if kubectl get pods -n production -o jsonpath='{.items[*].status.containerStatuses[*].state}' | grep -E '(waiting|terminated)'; then
+          echo "Some pods are not running properly. Checking logs..."
+          kubectl describe pods -n production
+          exit 1
+        fi
+        
         kubectl get services -n production
 
     - name: Run smoke tests
       run: |
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
         echo "Running production smoke tests..."
-        sleep 30
+        
+        echo "Testing API endpoint..."
+        kubectl port-forward -n production svc/archie-service 8080:80 &
+        sleep 5
+        curl -f http://localhost:8080/api/time || exit 1
+        pkill -f "kubectl port-forward"
+        
+        echo "Checking all pods are running..."
         kubectl get pods -n production
-        echo "Production deployment successful!"
+        
+        echo "Production deployment and smoke tests successful!"
