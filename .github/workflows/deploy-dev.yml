@@ -1,0 +1,69 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: archie-465300
+  GAR_LOCATION: us-west1
+  REPOSITORY: archie
+  SERVICE: archie
+  REGION: us-west1-a
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install dependencies and run tests
+      run: |
+        uv sync
+        uv run ruff check backend/
+        uv run ruff format backend/ --check
+        cd backend && uv run pytest -v
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: Configure Docker for GAR
+      run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev
+
+    - name: Get cluster credentials
+      run: |
+        gcloud container clusters get-credentials archie-dev --zone=$REGION
+
+    - name: Build and push Docker image
+      run: |
+        IMAGE_TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:${{ github.sha }}
+        docker build -t $IMAGE_TAG .
+        docker push $IMAGE_TAG
+
+    - name: Deploy to GKE
+      run: |
+        cd k8s/dev
+        kustomize edit set image archie-app=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:${{ github.sha }}
+        kubectl apply -k .
+
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/archie-deployment -n dev --timeout=300s
+        kubectl get services -n dev

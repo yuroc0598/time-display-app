@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: archie-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "archie-dev-ip"
+    networking.gke.io/managed-certificates: "archie-dev-ssl-cert"
+spec:
+  rules:
+  - host: dev.34.120.50.114.nip.io
+    http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: archie-service
+            port:
+              number: 80

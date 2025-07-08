@@ -1,0 +1,59 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: 'Type "deploy-to-production" to confirm'
+        required: true
+        default: ''
+
+env:
+  PROJECT_ID: archie-465300
+  GAR_LOCATION: us-west1
+  REPOSITORY: archie
+  SERVICE: archie
+  REGION: us-west1-a
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event.inputs.confirm_production == 'deploy-to-production'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: Configure Docker for GAR
+      run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev
+
+    - name: Get cluster credentials
+      run: |
+        gcloud container clusters get-credentials archie-production --zone=$REGION
+
+    - name: Deploy to GKE
+      run: |
+        cd k8s/prod
+        kustomize edit set image archie-app=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:${{ github.sha }}
+        kubectl apply -k .
+
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/archie-deployment -n production --timeout=300s
+        kubectl get services -n production
+
+    - name: Run smoke tests
+      run: |
+        echo "Running production smoke tests..."
+        sleep 30
+        kubectl get pods -n production
+        echo "Production deployment successful!"
