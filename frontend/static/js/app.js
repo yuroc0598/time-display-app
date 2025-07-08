@@ -4,7 +4,7 @@ async function updateTime() {
         const data = await response.json();
         
         // Update main time display
-        document.getElementById('time-display').textContent = `Local Time: ${data.current_time}`;
+        document.getElementById('time-display').textContent = `Los Angeles Time: ${data.current_time}`;
         
         // Update world clock
         const worldClockDiv = document.getElementById('world-clock');
