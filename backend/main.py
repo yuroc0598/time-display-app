@@ -48,7 +48,9 @@ async def get_current_time():
             }
 
     return {
-        "current_time": datetime.now(ZoneInfo("America/Los_Angeles")).strftime("%Y-%m-%d %H:%M:%S"),
+        "current_time": datetime.now(ZoneInfo("America/Los_Angeles")).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
         "world_times": world_times,
     }
 
